@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShopBase — Reporting System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0f0f1a;
+    --panel:    #16162a;
+    --border:   #2a2a45;
+    --accent:   #7b5ea7;
+    --accent2:  #a78bfa;
+    --green:    #34d399;
+    --red:      #f87171;
+    --text:     #e2e8f0;
+    --dim:      #64748b;
+    --row-odd:  #13132180;
+    --row-even: #1a1a2e80;
+    --sel:      #3b2f6e;
+  }
+
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .logo {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent2);
+    letter-spacing: 0.12em;
+  }
+  .logo-sub {
+    font-size: 10px;
+    color: var(--dim);
+    margin-top: 3px;
+    letter-spacing: 0.08em;
+  }
+
+  .nav-label {
+    font-size: 9px;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+    padding: 18px 20px 6px;
+    text-transform: uppercase;
+  }
+
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    border-left: 3px solid transparent;
+    width: 100%;
+    text-align: left;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .nav-btn:hover { background: #ffffff08; color: var(--accent2); }
+  .nav-btn.active {
+    background: #7b5ea720;
+    color: var(--accent2);
+    border-left-color: var(--accent2);
+  }
+  .nav-btn .icon { font-size: 14px; width: 18px; text-align: center; }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px 20px;
+    font-size: 9px;
+    color: var(--border);
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── MAIN ── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .topbar {
+    padding: 16px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel);
+  }
+  .topbar-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .topbar-hint  { font-size: 10px; color: var(--dim); }
+
+  .content {
+    flex: 1;
+    overflow: auto;
+    padding: 24px 28px;
+  }
+
+  /* ── WELCOME ── */
+  .welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 12px;
+    color: var(--dim);
+  }
+  .welcome-icon { font-size: 48px; opacity: 0.3; }
+  .welcome-text { font-size: 13px; }
+
+  /* ── PARAM BAR ── */
+  .param-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 14px 18px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .param-bar label { font-size: 11px; color: var(--dim); white-space: nowrap; }
+  .param-bar input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 6px 10px;
+    width: 100px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .param-bar input:focus { border-color: var(--accent2); }
+  .run-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .run-btn:hover { background: var(--accent2); }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  thead th {
+    background: var(--panel);
+    color: var(--accent2);
+    font-weight: 700;
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  tbody tr:nth-child(odd)  td { background: var(--row-odd);  }
+  tbody tr:nth-child(even) td { background: var(--row-even); }
+  tbody tr:hover td { background: var(--sel); }
+  tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #ffffff06;
+    white-space: nowrap;
+    color: var(--text);
+  }
+
+  /* status badges */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .badge-green { background: #34d39920; color: var(--green); }
+  .badge-red   { background: #f8717120; color: var(--red);   }
+  .badge-gray  { background: #64748b20; color: var(--dim);   }
+
+  /* status bar */
+  .status-bar {
+    margin-top: 12px;
+    font-size: 10px;
+    color: var(--dim);
+    padding: 6px 14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    display: inline-block;
+  }
+
+  /* error */
+  .error-msg {
+    color: var(--red);
+    background: #f8717115;
+    border: 1px solid #f8717140;
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 12px;
+    margin-top: 10px;
+  }
+
+  /* spinner */
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent2);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-title">SHOPBASE</div>
+    <div class="logo-sub">Reporting System</div>
+  </div>
+  <div class="nav-label">Reports</div>
+  <button class="nav-btn" onclick="load('customers', this)">
+    <span class="icon">👤</span> Customers
+  </button>
+  <button class="nav-btn" onclick="load('products', this)">
+    <span class="icon">📦</span> Products
+  </button>
+  <button class="nav-btn" onclick="load('orders', this)">
+    <span class="icon">🛒</span> Orders
+  </button>
+  <button class="nav-btn" onclick="showParam('payment', this)">
+    <span class="icon">💳</span> Payment
+  </button>
+  <button class="nav-btn" onclick="showParam('shipment', this)">
+    <span class="icon">🚚</span> Shipment
+  </button>
+  <div class="sidebar-footer">v1.0 &nbsp;•&nbsp; shopbase</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title" id="topbar-title">Select a report</span>
+    <span class="topbar-hint" id="topbar-hint"></span>
+  </div>
+  <div class="content" id="content">
+    <div class="welcome">
+      <div class="welcome-icon">🗄️</div>
+      <div class="welcome-text">Select a report from the sidebar</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const titles = {
+    customers: 'Customer Report',
+    products:  'Product Stock Report',
+    orders:    'Order Report',
+    payment:   'Payment Report',
+    shipment:  'Shipment Report',
+  };
+
+  function setActive(btn) {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function setTopbar(name, hint='') {
+    document.getElementById('topbar-title').textContent = titles[name] || name;
+    document.getElementById('topbar-hint').textContent = hint;
+  }
+
+  function renderTable(data) {
+    if (!data.rows.length) return '<div class="error-msg">No records found.</div>';
+
+    const statusCols = ['status', 'payment_status', 'is_active', 'is_available'];
+
+    const badge = (col, val) => {
+      if (!statusCols.includes(col.toLowerCase())) return val;
+      const v = val.toLowerCase();
+      if (['true','1','active','paid','delivered','completed'].includes(v))
+        return `<span class="badge badge-green">${val}</span>`;
+      if (['false','0','inactive','cancelled','failed'].includes(v))
+        return `<span class="badge badge-red">${val}</span>`;
+      return `<span class="badge badge-gray">${val}</span>`;
+    };
+
+    const head = data.cols.map(c => `<th>${c}</th>`).join('');
+    const body = data.rows.map(row =>
+      '<tr>' + row.map((v, i) => `<td>${badge(data.cols[i], v)}</td>`).join('') + '</tr>'
+    ).join('');
+
+    return `
+      <div class="table-wrap">
+        <table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
+      </div>
+      <div class="status-bar">${data.rows.length} row(s) returned</div>
+    `;
+  }
+
+  async function load(endpoint, btn, params='') {
+    setActive(btn);
+    setTopbar(endpoint);
+    const content = document.getElementById('content');
+    content.innerHTML = '<span class="spinner"></span> Loading...';
+    try {
+      const res  = await fetch(`/api/${endpoint}${params}`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      content.innerHTML = renderTable(data);
+    } catch (e) {
+      content.innerHTML = `<div class="error-msg">⚠ ${e.message}</div>`;
+    }
+  }
+
+  function showParam(endpoint, btn) {
+    setActive(btn);
+    setTopbar(endpoint, 'enter order ID to search');
+    const content = document.getElementById('content');
+    content.innerHTML = `
+      <div class="param-bar">
+        <label>Order ID:</label>
+        <input type="number" id="order-input" placeholder="e.g. 482" min="1"
+          onkeydown="if(event.key==='Enter') runParam('${endpoint}')">
+        <button class="run-btn" onclick="runParam('${endpoint}')">Run ▶</button>
+      </div>
+      <div id="param-result"></div>
+    `;
+    document.getElementById('order-input').focus();
+  }
+
+  async function runParam(endpoint) {
+    const val = document.getElementById('order-input').value.trim();
+    if (!val) { alert('Please enter an Order ID.'); return; }
+    const result = document.getElementById('param-result');
+    result.innerHTML = '<span class="spinner"></span> Loading...';
+    try {
+      const res  = await fetch(`/api/${endpoint}/${val}`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      result.innerHTML = renderTable(data);
+    } catch (e) {
+      result.innerHTML = `<div class="error-msg">⚠ ${e.message}</div>`;
+    }
+  }
+</script>
+</body>
+</html>
